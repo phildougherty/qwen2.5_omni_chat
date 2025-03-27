@@ -1,8 +1,6 @@
 # Qwen2.5 Omni Chat
+![image](https://github.com/user-attachments/assets/35d59e70-8c51-4018-adc8-1ca901d0cda9)
 
-A full-stack application that leverages Alibaba's Qwen2.5-Omni model to create a multi-modal AI assistant capable of processing and generating text, audio, images, and video.
-
-![Qwen Omni Chat Interface](https://i.imgur.com/placeholder.png)
 
 ## Features
 
