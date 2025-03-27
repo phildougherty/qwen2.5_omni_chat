@@ -177,8 +177,7 @@ nginx:
 If you encounter "CUDA out of memory" errors:
 
 1. Reduce the `MAX_CONVERSATION_TURNS` in `backend/app/config.py`
-2. Use a smaller model variant
-3. Increase the GPU memory allocation in `docker-compose.yml`
+2. Increase the GPU memory allocation in `docker-compose.yml`
 
 ### WebSocket Connection Issues
 
