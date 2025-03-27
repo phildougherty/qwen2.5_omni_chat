@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    container_name: qwen-speech-backend
+    restart: unless-stopped
+    expose:
+      - "8000"
+    volumes:
+      - ./backend:/app
+      - huggingface-cache:/root/.cache/huggingface  # Add named volume for cache
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+  
+  nginx:
+    build: ./nginx
+    container_name: qwen-speech-nginx
+    restart: unless-stopped
+    ports:
+      - "8888:80" 
+      - "8443:443"  
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - ./certs:/etc/nginx/certs  
+    depends_on:
+      - backend
+
+networks:
+  default:
+    name: qwen-speech-network
+
+volumes:
+  huggingface-cache: 
+    driver: local

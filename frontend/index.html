@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qwen Omni Assistant</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="omni-interface">
+            <div class="app-header">
+                <div class="assistant-info">
+                    <div class="assistant-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="assistant-name">Qwen Omni Assistant</div>
+                </div>
+                <div class="app-controls">
+                    <button id="resetButton" class="control-button" title="New conversation">
+                        <i class="fas fa-redo-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="app-body">
+                <div id="transcript-container" class="transcript-container">
+                    <div id="messages" class="messages"></div>
+                </div>
+            </div>
+
+            <div class="app-footer">
+                <div class="input-container">
+                    <div class="input-attachments">
+                        <label for="file-upload" class="attachment-button" title="Upload image or file">
+                            <i class="fas fa-paperclip"></i>
+                            <input id="file-upload" type="file" accept="image/*,video/*,audio/*" multiple hidden />
+                        </label>
+                    </div>
+                    
+                    <div class="text-input-container">
+                        <textarea id="text-input" placeholder="Type a message..." rows="1"></textarea>
+                        <button id="send-button" class="send-button" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="voice-toggle">
+                        <div class="visualizer-container">
+                            <canvas id="visualizer" width="50" height="50"></canvas>
+                            <button id="toggleVoiceButton" class="voice-button" title="Toggle voice mode">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="voice-call-panel" class="voice-call-panel hidden">
+                    <div class="call-visualizer-container">
+                        <canvas id="call-visualizer" width="200" height="200"></canvas>
+                        <div class="voice-waves">
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="status" class="status">Voice mode active</div>
+                    
+                    <div class="call-actions">
+                        <button id="muteButton" class="action-button muted">
+                            <i class="fas fa-microphone-slash"></i>
+                        </button>
+                        <button id="endCallButton" class="action-button end-call">
+                            <i class="fas fa-phone-slash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="upload-preview" class="upload-preview hidden">
+                    <div class="preview-header">
+                        <span>Attachments</span>
+                        <button id="clear-uploads" class="clear-button">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="preview-container" class="preview-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/recorder.js"></script>
+    <script src="./js/chat-ui.js"></script>
+    <script src="./js/app.js"></script>
+</body>
+</html>

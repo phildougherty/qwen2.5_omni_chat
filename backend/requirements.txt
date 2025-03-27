@@ -1,0 +1,10 @@
+fastapi==0.104.0
+uvicorn==0.23.2
+python-multipart==0.0.6
+numpy==1.24.3
+websockets==11.0.3
+soundfile==0.12.1
+pydub==0.25.1
+qwen-omni-utils[decord]>=0.0.3
+regex>=2021.8.3
+pydantic-settings>=2.0.0
