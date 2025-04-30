@@ -831,3 +831,40 @@ body {
         box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.2);
     }
 }
+
+.model-selector {
+    margin-left: 20px;
+}
+
+#modelSelector {
+    background-color: var(--primary-light);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 5px;
+    font-size: 0.9rem;
+}
+
+.download-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: all 0.2s;
+}
+
+.download-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.model-selector {
+    display: flex;
+    align-items: center;
+}

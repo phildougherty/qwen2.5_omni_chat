@@ -19,10 +19,23 @@ logger = logging.getLogger(__name__)
 
 class QwenOmniModel:
     def __init__(self):
-        logger.info(f"Initializing Qwen2.5-Omni model from {settings.MODEL_PATH}...")
+        model_path = settings.get_model_path()
+        logger.info(f"Initializing Qwen2.5-Omni {settings.MODEL_SIZE} model from {model_path}...")
         logger.info(f"Using device map: {settings.DEVICE_MAP}")
         logger.info(f"Using torch dtype: {settings.TORCH_DTYPE}")
         logger.info(f"Using attention implementation: {settings.ATTN_IMPLEMENTATION}")
+        
+        # Check if model is downloaded
+        from huggingface_hub import try_to_load_from_cache
+        from os.path import isfile
+        
+        model_file = try_to_load_from_cache(model_path, "config.json")
+        if not model_file or not isfile(model_file):
+            logger.warning(f"Model {model_path} is not downloaded yet.")
+            logger.info("Models will be downloaded on first use, which may cause a delay.")
+        else:
+            logger.info(f"Model {model_path} files found in cache.")
+        
         self.model = None
         self.processor = None
         self.initialized = False
@@ -30,16 +43,19 @@ class QwenOmniModel:
     def load_model(self):
         try:
             start_time = time.time()
-            
             # Log the available GPU memory before loading
             if torch.cuda.is_available():
                 free_mem, total_mem = torch.cuda.mem_get_info()
                 logger.info(f"GPU memory before loading: {free_mem/(1024**3):.2f} GB free out of {total_mem/(1024**3):.2f} GB total")
             
+            # Get the full model path based on size
+            model_path = settings.get_model_path()
+            logger.info(f"Loading model from: {model_path} (size: {settings.MODEL_SIZE})")
+            
             # Load processor first
             logger.info("Loading processor...")
             self.processor = Qwen2_5OmniProcessor.from_pretrained(
-                settings.MODEL_PATH,
+                model_path,
                 model_max_length=settings.MODEL_MAX_LENGTH,
             )
             logger.info(f"Processor loaded successfully in {time.time() - start_time:.2f} seconds")
@@ -47,12 +63,10 @@ class QwenOmniModel:
             # Then load model
             load_start_time = time.time()
             logger.info("Loading model...")
-            
             # Print what attention implementation we're using
             logger.info(f"Using attention implementation: {settings.ATTN_IMPLEMENTATION}")
-            
             self.model = Qwen2_5OmniModel.from_pretrained(
-                settings.MODEL_PATH,
+                model_path,
                 torch_dtype=settings.TORCH_DTYPE,
                 device_map=settings.DEVICE_MAP,
                 attn_implementation=settings.ATTN_IMPLEMENTATION,

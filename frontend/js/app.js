@@ -16,7 +16,7 @@ function setupAudioPermissions() {
             .catch(error => {
                 console.warn("Autoplay not allowed:", error);
                 // Show message to user
-                document.getElementById('status').textContent = 
+                document.getElementById('status').textContent =
                     'Please click anywhere on the page to enable audio responses';
                 // Add a click handler to the document to enable audio
                 document.addEventListener('click', function enableAudio() {
@@ -51,19 +51,15 @@ class AudioVisualizer {
         this.particles = [];
         this.particleCount = 100;
         this.mode = 'idle'; // 'idle', 'listening', 'processing', 'speaking'
-        
         // Initialize particles
         this.initParticles();
     }
-    
     initParticles() {
         this.particles = [];
         const radius = this.canvas.width / 2;
-        
         for (let i = 0; i < this.particleCount; i++) {
             const angle = Math.random() * Math.PI * 2;
             const distance = Math.random() * radius * 0.8;
-            
             this.particles.push({
                 x: Math.cos(angle) * distance,
                 y: Math.sin(angle) * distance,
@@ -75,7 +71,6 @@ class AudioVisualizer {
             });
         }
     }
-    
     getRandomColor() {
         const colors = [
             '#10a37f', // Primary green
@@ -86,21 +81,17 @@ class AudioVisualizer {
         ];
         return colors[Math.floor(Math.random() * colors.length)];
     }
-    
     setupAudioAnalyser(stream) {
         if (!this.audioContext) {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
-        
         const source = this.audioContext.createMediaStreamSource(stream);
         this.analyser = this.audioContext.createAnalyser();
         this.analyser.fftSize = 256;
         source.connect(this.analyser);
-        
         const bufferLength = this.analyser.frequencyBinCount;
         this.dataArray = new Uint8Array(bufferLength);
     }
-    
     startListeningVisualization(stream) {
         if (stream) {
             this.setupAudioAnalyser(stream);
@@ -108,29 +99,24 @@ class AudioVisualizer {
         this.mode = 'listening';
         this.start();
     }
-    
     startProcessingVisualization() {
         this.mode = 'processing';
         this.start();
     }
-    
     startSpeakingVisualization() {
         this.mode = 'speaking';
         this.start();
     }
-    
     startIdleVisualization() {
         this.mode = 'idle';
         this.start();
     }
-    
     start() {
         if (!this.isVisualizing) {
             this.isVisualizing = true;
             this.animate();
         }
     }
-    
     stop() {
         this.isVisualizing = false;
         if (this.rafId) {
@@ -139,20 +125,15 @@ class AudioVisualizer {
         }
         this.clearCanvas();
     }
-    
     clearCanvas() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
-    
     animate() {
         if (!this.isVisualizing) return;
-        
         this.rafId = requestAnimationFrame(() => this.animate());
         this.clearCanvas();
-        
         const centerX = this.canvas.width / 2;
         const centerY = this.canvas.height / 2;
-        
         // Different visualization based on mode
         if (this.mode === 'listening' && this.analyser) {
             // Listening mode - audio reactive
@@ -169,30 +150,24 @@ class AudioVisualizer {
             this.drawIdleVisualization(centerX, centerY);
         }
     }
-    
     drawListeningVisualization(centerX, centerY) {
         const radius = Math.min(this.canvas.width, this.canvas.height) / 2 * 0.7;
-        
         // Draw circular audio spectrum
         this.ctx.beginPath();
         this.ctx.arc(centerX, centerY, radius * 0.9, 0, Math.PI * 2);
         this.ctx.strokeStyle = 'rgba(16, 163, 127, 0.2)';
         this.ctx.lineWidth = 2;
         this.ctx.stroke();
-        
         const barCount = 32;
         const angleStep = (Math.PI * 2) / barCount;
-        
         for (let i = 0; i < barCount; i++) {
             const angle = i * angleStep;
             const value = this.dataArray[i % this.dataArray.length] / 255;
             const barHeight = value * radius * 0.7;
-            
             const x1 = centerX + Math.cos(angle) * radius * 0.9;
             const y1 = centerY + Math.sin(angle) * radius * 0.9;
             const x2 = centerX + Math.cos(angle) * (radius * 0.9 + barHeight);
             const y2 = centerY + Math.sin(angle) * (radius * 0.9 + barHeight);
-            
             this.ctx.beginPath();
             this.ctx.moveTo(x1, y1);
             this.ctx.lineTo(x2, y2);
@@ -201,40 +176,33 @@ class AudioVisualizer {
             this.ctx.stroke();
         }
     }
-    
     drawProcessingVisualization(centerX, centerY) {
         const radius = Math.min(this.canvas.width, this.canvas.height) / 2 * 0.7;
         const time = Date.now() / 1000;
-        
         // Draw pulsing circle
         this.ctx.beginPath();
         this.ctx.arc(centerX, centerY, radius * (0.8 + Math.sin(time * 2) * 0.05), 0, Math.PI * 2);
         this.ctx.strokeStyle = 'rgba(16, 163, 127, 0.3)';
         this.ctx.lineWidth = 2;
         this.ctx.stroke();
-        
         // Draw rotating dots
         const dotCount = 12;
         const angleStep = (Math.PI * 2) / dotCount;
-        
         for (let i = 0; i < dotCount; i++) {
             const angle = i * angleStep + time;
             const x = centerX + Math.cos(angle) * radius * 0.8;
             const y = centerY + Math.sin(angle) * radius * 0.8;
-            
             this.ctx.beginPath();
             this.ctx.arc(x, y, 3 + Math.sin(time * 3 + i) * 2, 0, Math.PI * 2);
             this.ctx.fillStyle = `rgba(16, 163, 127, ${0.5 + Math.sin(time + i) * 0.3})`;
             this.ctx.fill();
         }
-        
         // Draw connecting lines
         this.ctx.beginPath();
         for (let i = 0; i < dotCount; i++) {
             const angle = i * angleStep + time;
             const x = centerX + Math.cos(angle) * radius * 0.8;
             const y = centerY + Math.sin(angle) * radius * 0.8;
-            
             if (i === 0) {
                 this.ctx.moveTo(x, y);
             } else {
@@ -246,60 +214,49 @@ class AudioVisualizer {
         this.ctx.lineWidth = 1;
         this.ctx.stroke();
     }
-    
     drawSpeakingVisualization(centerX, centerY) {
         const radius = Math.min(this.canvas.width, this.canvas.height) / 2 * 0.7;
         const time = Date.now() / 1000;
-        
         // Draw concentric circles
         for (let i = 0; i < 3; i++) {
             const pulseRadius = radius * (0.6 + i * 0.2);
             const phase = i * Math.PI / 3;
             const scale = 0.05 + 0.03 * Math.sin(time * 2 + phase);
-            
             this.ctx.beginPath();
             this.ctx.arc(centerX, centerY, pulseRadius * (1 + scale), 0, Math.PI * 2);
             this.ctx.strokeStyle = `rgba(16, 163, 127, ${0.3 - i * 0.1})`;
             this.ctx.lineWidth = 2;
             this.ctx.stroke();
         }
-        
         // Draw animated particles around the circle
         const particleCount = 20;
         const angleStep = (Math.PI * 2) / particleCount;
-        
         for (let i = 0; i < particleCount; i++) {
             const angle = i * angleStep + time * 0.5;
             const waveOffset = Math.sin(time * 3 + i) * 0.1;
             const particleRadius = radius * (0.9 + waveOffset);
             const x = centerX + Math.cos(angle) * particleRadius;
             const y = centerY + Math.sin(angle) * particleRadius;
-            
             this.ctx.beginPath();
             this.ctx.arc(x, y, 2 + Math.sin(time * 2 + i) * 1, 0, Math.PI * 2);
             this.ctx.fillStyle = `rgba(16, 163, 127, ${0.6 + Math.sin(time + i) * 0.2})`;
             this.ctx.fill();
         }
     }
-    
     drawIdleVisualization(centerX, centerY) {
         const radius = Math.min(this.canvas.width, this.canvas.height) / 2 * 0.7;
-        
         // Draw base circle
         this.ctx.beginPath();
         this.ctx.arc(centerX, centerY, radius * 0.8, 0, Math.PI * 2);
         this.ctx.strokeStyle = 'rgba(16, 163, 127, 0.1)';
         this.ctx.lineWidth = 1;
         this.ctx.stroke();
-        
         // Update and draw particles
         for (let i = 0; i < this.particles.length; i++) {
             const p = this.particles[i];
-            
             // Update position
             p.x += p.speedX;
             p.y += p.speedY;
-            
             // Contain particles within circle
             const distance = Math.sqrt(p.x * p.x + p.y * p.y);
             if (distance > radius * 0.7) {
@@ -310,7 +267,6 @@ class AudioVisualizer {
                 p.speedX *= -0.5;
                 p.speedY *= -0.5;
             }
-            
             // Draw particle
             this.ctx.beginPath();
             this.ctx.arc(centerX + p.x, centerY + p.y, p.size, 0, Math.PI * 2);
@@ -335,37 +291,31 @@ class ContinuousAudioRecorder extends AudioRecorder {
         this.onSpeechStart = null;
         this.onSpeechEnd = null;
     }
-    
     async startContinuous() {
         if (this.continuousMode) return;
-        
         try {
             // Request microphone access if we don't already have it
             if (!this.stream) {
                 console.log("Requesting microphone access for continuous mode...");
-                this.stream = await navigator.mediaDevices.getUserMedia({ 
+                this.stream = await navigator.mediaDevices.getUserMedia({
                     audio: {
                         echoCancellation: true,
                         noiseSuppression: true,
                         autoGainControl: true
-                    } 
+                    }
                 });
                 console.log("Microphone access granted for continuous mode!");
             }
-            
             // Set up audio context for silence detection
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const source = audioContext.createMediaStreamSource(this.stream);
             const processor = audioContext.createScriptProcessor(4096, 1, 1);
-            
             processor.onaudioprocess = (e) => this.detectSpeech(e);
             source.connect(processor);
             processor.connect(audioContext.destination);
-            
             this.audioProcessor = processor;
             this.audioContext = audioContext;
             this.continuousMode = true;
-            
             console.log("Continuous listening mode activated");
             return this.stream;
         } catch (error) {
@@ -373,18 +323,14 @@ class ContinuousAudioRecorder extends AudioRecorder {
             throw error;
         }
     }
-
     muteDetection(muted) {
         if (!this.continuousMode) return;
-        
         this.muted = muted; // Set the muted state
-        
         if (muted) {
             // Disconnect the processor to stop audio processing
             if (this.audioProcessor) {
                 this.audioProcessor.disconnect();
             }
-            
             // Stop any active recording
             if (this.recording) {
                 this.stop();
@@ -398,41 +344,32 @@ class ContinuousAudioRecorder extends AudioRecorder {
             }
         }
     }
-
     stopContinuous() {
         if (!this.continuousMode) return;
-        
         // Clean up audio processing
         if (this.audioProcessor) {
             this.audioProcessor.disconnect();
             this.audioProcessor = null;
         }
-        
         // Stop any active recording
         if (this.recording) {
             this.stop();
         }
-        
         this.continuousMode = false;
         console.log("Continuous listening mode deactivated");
     }
-    
     detectSpeech(e) {
         if (!this.continuousMode) return;
-        
         // Skip processing if muted
         if (this.muted) return;
-        
         // Get audio data
         const input = e.inputBuffer.getChannelData(0);
-        
         // Calculate RMS (root mean square) as a measure of volume
         let sum = 0;
         for (let i = 0; i < input.length; i++) {
             sum += input[i] * input[i];
         }
         const rms = Math.sqrt(sum / input.length);
-        
         // Check if speaking
         if (rms > this.silenceDetectionThreshold) {
             // If not already recording, start recording
@@ -442,18 +379,15 @@ class ContinuousAudioRecorder extends AudioRecorder {
                 this.recordingStartTime = Date.now();
                 if (this.onSpeechStart) this.onSpeechStart();
             }
-            
             // Reset silence timer
             if (this.silenceTimer) {
                 clearTimeout(this.silenceTimer);
                 this.silenceTimer = null;
             }
-            
             this.isSpeaking = true;
         } else if (this.recording) {
             // Check if we've been recording for the minimum time
             const recordingTime = Date.now() - this.recordingStartTime;
-            
             if (recordingTime >= this.minRecordingTime) {
                 // If silence is detected and we're recording, start silence timer
                 if (!this.silenceTimer) {
@@ -473,7 +407,6 @@ class ContinuousAudioRecorder extends AudioRecorder {
 
 // File upload handling
 let uploadedFiles = [];
-
 function setupFileUpload() {
     const fileUploadInput = document.getElementById('file-upload');
     const clearUploadsButton = document.getElementById('clear-uploads');
@@ -481,29 +414,23 @@ function setupFileUpload() {
     const previewContainer = document.getElementById('preview-container');
     const textInput = document.getElementById('text-input');
     const sendButton = document.getElementById('send-button');
-    
     // File upload change handler
     fileUploadInput.addEventListener('change', (e) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
-        
         // Process each file
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            
             // Check file size (limit to 10MB)
             if (file.size > 10 * 1024 * 1024) {
                 alert(`File ${file.name} is too large. Maximum size is 10MB.`);
                 continue;
             }
-            
             // Add to uploaded files array
             uploadedFiles.push(file);
-            
             // Create preview
             const previewItem = document.createElement('div');
             previewItem.className = 'preview-item';
-            
             // Different preview based on file type
             if (file.type.startsWith('image/')) {
                 const img = document.createElement('img');
@@ -518,7 +445,6 @@ function setupFileUpload() {
                 // Generic file preview
                 const filePreview = document.createElement('div');
                 filePreview.className = 'file-preview';
-                
                 // Icon based on file type
                 const icon = document.createElement('i');
                 if (file.type.startsWith('audio/')) {
@@ -531,16 +457,13 @@ function setupFileUpload() {
                     icon.className = 'fas fa-file';
                 }
                 filePreview.appendChild(icon);
-                
                 // File extension
                 const fileExt = document.createElement('div');
                 fileExt.className = 'file-ext';
                 fileExt.textContent = file.name.split('.').pop().toUpperCase();
                 filePreview.appendChild(fileExt);
-                
                 previewItem.appendChild(filePreview);
             }
-            
             // Remove button
             const removeButton = document.createElement('button');
             removeButton.className = 'remove-preview';
@@ -551,65 +474,158 @@ function setupFileUpload() {
                 if (index > -1) {
                     uploadedFiles.splice(index, 1);
                 }
-                
                 // Remove preview
                 previewItem.remove();
-                
                 // Hide preview container if empty
                 if (uploadedFiles.length === 0) {
                     uploadPreview.classList.add('hidden');
                 }
-                
                 // Update send button state
                 updateSendButtonState();
             });
             previewItem.appendChild(removeButton);
-            
             // Add to preview container
             previewContainer.appendChild(previewItem);
         }
-        
         // Show preview container
         uploadPreview.classList.remove('hidden');
-        
         // Update send button state
         updateSendButtonState();
-        
         // Reset file input
         fileUploadInput.value = '';
     });
-    
     // Clear uploads button
     clearUploadsButton.addEventListener('click', () => {
         // Clear uploaded files array
         uploadedFiles = [];
-        
         // Clear preview container
         previewContainer.innerHTML = '';
-        
         // Hide preview container
         uploadPreview.classList.add('hidden');
-        
         // Update send button state
         updateSendButtonState();
     });
-    
     // Text input handler for send button state
     textInput.addEventListener('input', () => {
         // Auto-resize textarea
         textInput.style.height = 'auto';
         textInput.style.height = (textInput.scrollHeight) + 'px';
-        
         // Update send button state
         updateSendButtonState();
     });
-    
     // Function to update send button state
     function updateSendButtonState() {
         const hasText = textInput.value.trim().length > 0;
         const hasFiles = uploadedFiles.length > 0;
-        
         sendButton.disabled = !hasText && !hasFiles;
+    }
+}
+
+// Setup model selector
+function setupModelSelector() {
+    const modelSelector = document.getElementById('modelSelector');
+    if (!modelSelector) return;
+    
+    // Set initial value from localStorage or default to 7B
+    const savedModel = localStorage.getItem('preferredModelSize') || '7B';
+    modelSelector.value = savedModel;
+    
+    // Add change handler
+    modelSelector.addEventListener('change', function() {
+        const newSize = this.value;
+        localStorage.setItem('preferredModelSize', newSize);
+        
+        // Ask user to confirm reload
+        if (confirm(`Switch to ${newSize} model? This will reset your current conversation.`)) {
+            // Send reset command with model size
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ 
+                    type: 'reset',
+                    modelSize: newSize
+                }));
+                statusElement.textContent = `Switching to ${newSize} model...`;
+            }
+        } else {
+            // Revert selection if user cancels
+            this.value = savedModel;
+        }
+    });
+}
+
+// Check model download status
+async function checkModelStatus() {
+    try {
+        const response = await fetch('/model/status');
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Get the download status of both models
+            const model3bStatus = data.models['3B'].status === 'found' ? 'Downloaded' : 'Not Downloaded';
+            const model7bStatus = data.models['7B'].status === 'found' ? 'Downloaded' : 'Not Downloaded';
+            
+            // Update the UI to show download status
+            const modelSelector = document.getElementById('modelSelector');
+            if (modelSelector) {
+                // Update the options text to show download status
+                const options = modelSelector.options;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].value === '3B') {
+                        options[i].textContent = `3B Model (${model3bStatus})`;
+                    } else if (options[i].value === '7B') {
+                        options[i].textContent = `7B Model (${model7bStatus})`;
+                    }
+                }
+                
+                // Add a download indicator if needed
+                if (model3bStatus !== 'Downloaded' || model7bStatus !== 'Downloaded') {
+                    const downloadBtn = document.getElementById('downloadModelsBtn');
+                    if (!downloadBtn) {
+                        const btn = document.createElement('button');
+                        btn.id = 'downloadModelsBtn';
+                        btn.className = 'download-btn';
+                        btn.innerHTML = '<i class="fas fa-download"></i>';
+                        btn.title = 'Download models';
+                        btn.addEventListener('click', downloadMissingModels);
+                        document.querySelector('.model-selector').appendChild(btn);
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error checking model status:', error);
+    }
+}
+
+// Function to download missing models
+async function downloadMissingModels() {
+    try {
+        const response = await fetch('/model/status');
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Check which models need downloading
+            if (data.models['3B'].status !== 'found') {
+                await fetch('/model/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ size: '3B' })
+                });
+            }
+            
+            if (data.models['7B'].status !== 'found') {
+                await fetch('/model/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ size: '7B' })
+                });
+            }
+            
+            // Show notification
+            alert('Model download started in the background. This may take some time.');
+        }
+    } catch (error) {
+        console.error('Error downloading models:', error);
+        alert('Error starting model download. Check console for details.');
     }
 }
 
@@ -617,13 +633,10 @@ function setupFileUpload() {
 async function sendMessage() {
     const textInput = document.getElementById('text-input');
     const text = textInput.value.trim();
-    
     // Don't send if no content and no files
     if (!text && uploadedFiles.length === 0) return;
-    
     // Prepare message content
     let messageContent = [];
-    
     // Add text if present
     if (text) {
         messageContent.push({
@@ -631,13 +644,11 @@ async function sendMessage() {
             text: text
         });
     }
-    
     // Process files
     for (const file of uploadedFiles) {
         try {
             // Convert file to base64
             const base64Data = await fileToBase64(file);
-            
             if (file.type.startsWith('image/')) {
                 messageContent.push({
                     type: 'image',
@@ -670,11 +681,9 @@ async function sendMessage() {
             chatUI.addErrorMessage(`Failed to process file ${file.name}`);
         }
     }
-    
     // Create message preview in chat
     const messagePreview = createMessagePreview(text, uploadedFiles);
     chatUI.addCustomMessage('user', messagePreview);
-    
     // Clear input and uploads
     textInput.value = '';
     textInput.style.height = 'auto';
@@ -682,18 +691,15 @@ async function sendMessage() {
     document.getElementById('preview-container').innerHTML = '';
     document.getElementById('upload-preview').classList.add('hidden');
     document.getElementById('send-button').disabled = true;
-    
     // Send to server
     if (ws.readyState === WebSocket.OPEN) {
         // Add typing indicator
         chatUI.addTypingIndicator();
-        
         // Prepare message for server
         const serverMessage = {
             type: 'message',
             content: messageContent
         };
-        
         console.log("Sending message to server:", serverMessage);
         ws.send(JSON.stringify(serverMessage));
     } else {
@@ -717,19 +723,16 @@ function fileToBase64(file) {
 // Function to create a message preview with files
 function createMessagePreview(text, files) {
     const container = document.createElement('div');
-    
     // Add text if present
     if (text) {
         const textElement = document.createElement('div');
         textElement.textContent = text;
         container.appendChild(textElement);
     }
-    
     // Add files
     for (const file of files) {
         const mediaElement = document.createElement('div');
         mediaElement.className = 'message-media';
-        
         if (file.type.startsWith('image/')) {
             const img = document.createElement('img');
             img.className = 'message-image';
@@ -751,10 +754,8 @@ function createMessagePreview(text, files) {
             // Generic file
             const fileElement = document.createElement('div');
             fileElement.className = 'message-file';
-            
             const iconElement = document.createElement('div');
             iconElement.className = 'file-icon';
-            
             // Icon based on file type
             const icon = document.createElement('i');
             if (file.type.includes('pdf')) {
@@ -765,30 +766,22 @@ function createMessagePreview(text, files) {
                 icon.className = 'fas fa-file';
             }
             iconElement.appendChild(icon);
-            
             const infoElement = document.createElement('div');
             infoElement.className = 'file-info';
-            
             const nameElement = document.createElement('div');
             nameElement.className = 'file-name';
             nameElement.textContent = file.name;
-            
             const sizeElement = document.createElement('div');
             sizeElement.className = 'file-size';
             sizeElement.textContent = formatFileSize(file.size);
-            
             infoElement.appendChild(nameElement);
             infoElement.appendChild(sizeElement);
-            
             fileElement.appendChild(iconElement);
             fileElement.appendChild(infoElement);
-            
             mediaElement.appendChild(fileElement);
         }
-        
         container.appendChild(mediaElement);
     }
-    
     return container;
 }
 
@@ -799,20 +792,51 @@ function formatFileSize(bytes) {
     else return (bytes / 1048576).toFixed(1) + ' MB';
 }
 
+// Helper function to determine WebSocket URL
+function getWebSocketUrl() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    
+    // Default ports for HTTP/HTTPS
+    let port = window.location.port;
+    
+    // If we're on a non-standard port (like 8443 or 8888), use it
+    // If we're on standard 80/443 or no port, use the backend port (8000)
+    if (!port || port === '80' || port === '443') {
+        // Check if we're in a development or specific deployment environment
+        if (window.location.hostname === 'localhost') {
+            port = '8000';  // Default backend port
+        }
+    }
+    
+    // Construct the URL
+    let wsUrl = `${protocol}//${window.location.hostname}`;
+    if (port) {
+        wsUrl += `:${port}`;
+    }
+    
+    // If we're behind a proxy like Nginx, we might need to use a path
+    // Check if we're accessing through a specific port that might be proxied
+    if (window.location.port === '8443' || window.location.port === '8888') {
+        wsUrl += '/ws/';
+    } else {
+        // Otherwise use the direct WebSocket endpoint
+        wsUrl += '/ws/';
+    }
+    
+    return wsUrl;
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
     try {
         // Check if browser supports necessary APIs
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw new Error("Your browser doesn't support audio recording. Please use a modern browser like Chrome, Firefox, or Edge.");
         }
-        
         // Try to get microphone permissions early
         await navigator.mediaDevices.getUserMedia({ audio: true });
         console.log("Microphone access granted on page load");
-        
         // Setup audio playback permissions
         setupAudioPermissions();
-        
         // Initialize the rest of the application
         initializeApp();
     } catch (error) {
@@ -825,7 +849,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 function initializeApp() {
     // Generate a unique session ID
     const sessionId = generateSessionId();
-    
     // Debug logging for URL information
     console.log("Current URL:", window.location.href);
     console.log("Hostname:", window.location.hostname);
@@ -833,21 +856,20 @@ function initializeApp() {
     console.log("Protocol:", window.location.protocol);
     
     // Initialize WebSocket connection
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // Use the same host and port as the page
-    const wsUrl = `${wsProtocol}//${window.location.host}/ws/${sessionId}`;
+    const wsBaseUrl = getWebSocketUrl();
+    const wsUrl = `${wsBaseUrl}${sessionId}`;
     console.log("Connecting to WebSocket at:", wsUrl);
     window.ws = new WebSocket(wsUrl);
+    
     let reconnectAttempts = 0;
     let reconnectTimer = null;
-
+    
     // Initialize audio recorder with continuous mode
-    const recorder = new ContinuousAudioRecorder();
+    const recorder =  new ContinuousAudioRecorder();
     
     // Initialize audio visualizers
     const smallVisualizer = new AudioVisualizer('visualizer');
     smallVisualizer.startIdleVisualization();
-    
     const callVisualizer = new AudioVisualizer('call-visualizer');
     callVisualizer.startIdleVisualization();
     
@@ -870,7 +892,10 @@ function initializeApp() {
     
     // Setup file upload and text input
     setupFileUpload();
-
+    
+    // Setup model selector
+    setupModelSelector();
+    
     function setupWebSocket() {
         ws.onopen = () => {
             console.log('WebSocket connection established');
@@ -878,6 +903,9 @@ function initializeApp() {
             toggleVoiceButton.disabled = false;
             resetButton.disabled = false;
             reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+            
+            // Check model status shortly after connection
+            setTimeout(checkModelStatus, 1000);
             
             // Add welcome message if no messages
             if (messagesContainer.children.length === 0) {
@@ -892,17 +920,14 @@ function initializeApp() {
             endCallButton.disabled = true;
             muteButton.disabled = true;
             document.getElementById('send-button').disabled = true;
-            
             // End call if active
             if (callActive) {
                 endCall();
             }
-            
             // Clear any existing reconnect timer
             if (reconnectTimer) {
                 clearTimeout(reconnectTimer);
             }
-            
             // Attempt to reconnect with exponential backoff
             if (reconnectAttempts < 5) {
                 const timeout = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000);
@@ -922,12 +947,10 @@ function initializeApp() {
             try {
                 const data = JSON.parse(event.data);
                 console.log("Received message:", data.type);
-                
                 if (data.type === 'processing') {
                     statusElement.textContent = 'Processing...';
                     statusElement.classList.add('processing');
                     processingResponse = true;
-                    
                     // Switch visualizer to processing mode
                     if (callActive) {
                         callVisualizer.startProcessingVisualization();
@@ -939,10 +962,8 @@ function initializeApp() {
                     // Remove temporary processing message if exists
                     chatUI.removeTemporaryMessage();
                     processingResponse = false;
-                    
                     // Add new response to chat
                     chatUI.addMessage('assistant', data.text);
-                    
                     // Debug audio response
                     console.log("Response data:", {
                         text_length: data.text?.length || 0,
@@ -950,7 +971,6 @@ function initializeApp() {
                         audio_length: data.audio?.length || 0,
                         debug: data.debug || "No debug info"
                     });
-                    
                     // Play audio if available
                     if (data.audio) {
                         console.log("Playing audio response, length:", data.audio.length);
@@ -964,7 +984,6 @@ function initializeApp() {
                         console.warn("No audio in response");
                         statusElement.textContent = callActive ? 'Listening...' : 'Ready';
                         statusElement.classList.remove('processing');
-                        
                         // Return visualizer to appropriate mode
                         if (callActive) {
                             callVisualizer.startListeningVisualization(recorder.stream);
@@ -977,14 +996,12 @@ function initializeApp() {
                     statusElement.classList.remove('processing');
                     chatUI.removeTemporaryMessage();
                     processingResponse = false;
-                    
                     // Return visualizer to appropriate mode
                     if (callActive) {
                         callVisualizer.startListeningVisualization(recorder.stream);
                     } else {
                         smallVisualizer.startIdleVisualization();
                     }
-                    
                     // Check if it's an OOM error
                     if (data.message.includes('CUDA out of memory') || data.message.includes('OOM')) {
                         statusElement.textContent = 'Memory limit reached. Please reset the conversation to continue.';
@@ -1001,6 +1018,15 @@ function initializeApp() {
                     chatUI.clearMessages();
                     statusElement.textContent = callActive ? 'Listening...' : 'Ready';
                     resetButton.classList.remove('pulse-attention');
+                    
+                    // Update model selector if the model size was changed
+                    if (data.modelSize) {
+                        const modelSelector = document.getElementById('modelSelector');
+                        if (modelSelector) {
+                            modelSelector.value = data.modelSize;
+                            localStorage.setItem('preferredModelSize', data.modelSize);
+                        }
+                    }
                     
                     // Add welcome message
                     chatUI.addMessage('assistant', 'Hello! I\'m your Qwen Omni Assistant. I can help with text, voice, images, and more. How can I assist you today?');
@@ -1039,24 +1065,20 @@ function initializeApp() {
         console.log("Speech ended, processing audio...");
         toggleVoiceButton.classList.remove('listening');
         statusElement.textContent = 'Processing...';
-        
         // Check if recording is too short
         if (audioBlob.size < 1000) {
             console.log("Recording too short, continuing to listen...");
             statusElement.textContent = 'Listening...';
             return;
         }
-        
         // Add user message to chat
         chatUI.addMessage('user', 'Voice message', true);
-        
         // Switch visualizer to processing mode
         if (callActive) {
             callVisualizer.startProcessingVisualization();
         } else {
             smallVisualizer.startProcessingVisualization();
         }
-        
         // Convert blob to base64 and send to server
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -1085,14 +1107,12 @@ function initializeApp() {
             // Show voice call panel
             voiceCallPanel.classList.remove('hidden');
             toggleVoiceButton.classList.add('active');
-            
             // Start voice call
             startCall();
         } else {
             // Hide voice call panel
             voiceCallPanel.classList.add('hidden');
             toggleVoiceButton.classList.remove('active');
-            
             // End voice call
             endCall();
         }
@@ -1133,16 +1153,13 @@ function initializeApp() {
     
     function startCall() {
         if (callActive) return;
-        
         recorder.startContinuous().then((stream) => {
             callActive = true;
             toggleVoiceButton.classList.add('active');
             statusElement.textContent = 'Listening...';
-            
             // Enable call control buttons
             muteButton.disabled = false;
             endCallButton.disabled = false;
-            
             // Start visualizer in listening mode
             callVisualizer.startListeningVisualization(stream);
         }).catch(error => {
@@ -1153,39 +1170,31 @@ function initializeApp() {
     
     function endCall() {
         if (!callActive) return;
-        
         recorder.stopContinuous();
         callActive = false;
         muted = false;
-        
         // Update UI
         toggleVoiceButton.classList.remove('active', 'listening');
         muteButton.classList.remove('active');
         muteButton.querySelector('i').className = 'fas fa-microphone-slash';
         statusElement.textContent = 'Call ended';
-        
         // Disable call control buttons
         muteButton.disabled = true;
         endCallButton.disabled = true;
-        
         // Switch visualizer back to idle
         callVisualizer.startIdleVisualization();
         smallVisualizer.startIdleVisualization();
     }
-
+    
     function toggleMute() {
         if (!callActive) return;
-        
         muted = !muted;
-        
         if (muted) {
             // Update UI for muted state
             muteButton.classList.add('active');
             statusElement.textContent = 'Microphone muted';
-            
             // Switch visualizer to idle
             callVisualizer.startIdleVisualization();
-            
             // Temporarily disable speech detection without stopping continuous mode
             if (recorder.audioProcessor) {
                 // Disconnect the processor to stop audio processing
@@ -1195,10 +1204,8 @@ function initializeApp() {
             // Update UI for unmuted state
             muteButton.classList.remove('active');
             statusElement.textContent = 'Listening...';
-            
             // Switch visualizer back to listening
             callVisualizer.startListeningVisualization(recorder.stream);
-            
             // Re-enable speech detection
             if (recorder.audioProcessor && recorder.audioContext && recorder.stream) {
                 // Reconnect the processor
@@ -1215,13 +1222,11 @@ function initializeApp() {
             // Create audio element
             const audioSrc = 'data:audio/wav;base64,' + base64Audio;
             const audio = new Audio(audioSrc);
-            
             // Set up debugging events
             audio.onerror = (e) => {
                 console.error('Error playing audio:', e);
                 statusElement.textContent = 'Error playing audio response';
                 statusElement.classList.remove('processing');
-                
                 // Return visualizer to appropriate mode
                 if (callActive) {
                     callVisualizer.startListeningVisualization(recorder.stream);
@@ -1229,7 +1234,6 @@ function initializeApp() {
                     smallVisualizer.startIdleVisualization();
                 }
             };
-            
             audio.oncanplaythrough = () => {
                 console.log('Audio ready to play');
                 statusElement.textContent = 'Playing response...';
@@ -1238,7 +1242,6 @@ function initializeApp() {
                     console.error('Error playing audio:', error);
                     statusElement.textContent = 'Could not play audio. Click to interact with the page first.';
                     statusElement.classList.remove('processing');
-                    
                     // Return visualizer to appropriate mode
                     if (callActive) {
                         callVisualizer.startListeningVisualization(recorder.stream);
@@ -1247,12 +1250,10 @@ function initializeApp() {
                     }
                 });
             };
-            
             audio.onended = () => {
                 console.log('Audio playback finished');
                 statusElement.textContent = callActive ? 'Listening...' : 'Ready';
                 statusElement.classList.remove('processing');
-                
                 // Return visualizer to appropriate mode
                 if (callActive) {
                     callVisualizer.startListeningVisualization(recorder.stream);
@@ -1260,14 +1261,12 @@ function initializeApp() {
                     smallVisualizer.startIdleVisualization();
                 }
             };
-            
             // Start loading the audio
             audio.load();
         } catch (error) {
             console.error('Error setting up audio playback:', error);
             statusElement.textContent = 'Error playing audio: ' + error.message;
             statusElement.classList.remove('processing');
-            
             // Return visualizer to appropriate mode
             if (callActive) {
                 callVisualizer.startListeningVisualization(recorder.stream);
@@ -1333,7 +1332,6 @@ function initializeApp() {
                 toggleMute();
             }
         }
-        
         // Escape to end call
         if (e.code === 'Escape' && callActive) {
             e.preventDefault();
@@ -1341,7 +1339,6 @@ function initializeApp() {
             voiceCallPanel.classList.add('hidden');
             toggleVoiceButton.classList.remove('active');
         }
-        
         // 'R' to reset conversation
         if (e.code === 'KeyR' && !e.repeat && (e.ctrlKey || e.metaKey) && !e.target.matches('input, textarea, [contenteditable]')) {
             e.preventDefault();
